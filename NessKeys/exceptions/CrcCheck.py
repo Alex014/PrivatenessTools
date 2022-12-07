@@ -1,0 +1,2 @@
+class CrcCheck(Exception):
+    pass
