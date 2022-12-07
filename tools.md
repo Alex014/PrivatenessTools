@@ -230,6 +230,10 @@ params
 
 ### <local dirname>
 
++++
+===
+***
+===
 key.py
 ======
 
@@ -243,25 +247,19 @@ params
   - list {dirpath]
     - List all keys in selected directory or current directory
 
-  - find [dirpath]
-    - Find recursively all keys in selected directory or current directory
-
 
 ### Show Key
   - show <keyfile>
     - Show all contents of keyfile
 
-  - show -p <keyfile>
-    - Show private key
+  - nvs <keyfile>
+    - show nvs name (for blockchain)
 
-  - show -v <keyfile>
-    - Show verify key
+  - worm <keyfile>
+    - Show <worm> for blockchain (if there are any)
 
-  - show -p <keyfile>
-    - Show public key
-
-  - show -w <keyfile>
-    - Show <worm> for blockchain
+  - list <keyfile>
+    - Show all encrypted keys (if there are any)
 
 
 ### Pack keyfiles into encrypted keyfile
@@ -279,4 +277,7 @@ params
 ### Restore local keyfiles from encrypted keyfile
   - restore <encrypted keyfile>
 
+
+Tasks
+-----
 
