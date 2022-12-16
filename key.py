@@ -54,6 +54,8 @@ class Key:
         print(" save <encrypted keyfile>")
         print("### Restore local keyfiles from encrypted keyfile")
         print(" restore <encrypted keyfile>")
+        print("### Eraise keyfile or all local keyfiles (fill with 0)")
+        print(" eraise [encrypted keyfile]")
 
         km = self.__getKM()
         print("\nKeys directory: " + km.directory)
