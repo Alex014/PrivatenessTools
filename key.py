@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+from pathlib import Path
 from base64 import b64encode
 from base64 import b64decode
 import json
@@ -53,6 +54,9 @@ class Key:
         print(" save <encrypted keyfile>")
         print("### Restore local keyfiles from encrypted keyfile")
         print(" restore <encrypted keyfile>")
+
+        km = self.__getKM()
+        print("\nKeys directory: " + km.directory)
 
     def __getKM(self):
         storage = StorageJson()
@@ -164,10 +168,62 @@ class Key:
             except CrcCheck as e:
                 print("Wrong password (CRC check error)")
 
+        elif len(sys.argv) == 3 and sys.argv[1].lower() == 'init':
+            km = self.__getKM()
+            user_keyfile = sys.argv[2]
+
+            km.init(user_keyfile)
+
+        elif len(sys.argv) == 2 and sys.argv[1].lower() == 'eraise':
+            answer = input("Eraise all local keys y/n :")
+            if answer.lower() == 'y':
+                km = self.__getKM()
+                km.eraiseAll()
+
+            print("Keyfiles eraised !")
+
+        elif len(sys.argv) == 3 and sys.argv[1].lower() == 'eraise':
+            km = self.__getKM()
+            keyfile = sys.argv[2]
+
+            if os.path.exists(keyfile):
+                answer = input("Eraise all local keys y/n :")
+                if answer.lower() == 'y':
+                    km.eraise(keyfile)
+                    print ("File '%s' eraised" % (keyfile))
+            else:
+                print ("File '%s' does not exist" % (keyfile))
+
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'save':
-            print(" * Not implemented yet * ")
+            km = self.__getKM()
+            keyfile = sys.argv[2]
+
+            password = getpass.getpass("Type password:")
+            password2 = getpass.getpass("Confirm password:")
+
+            if password != password2:
+                print("Passwords does not match")
+                return False
+
+            km.save(keyfile, password)
+
+            print("Keyfiles saved !")
+
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'restore':
-            print(" * Not implemented yet * ")
+            keyfile = sys.argv[2]
+            km = self.__getKM()
+
+            password = getpass.getpass("Type password:")      
+
+            try:
+                km.restore(keyfile, password)
+            except LeafBuildException as e:
+                print("File format error: \"{}\" path: {}".format(e.msg, e.path))
+            except CrcCheck as e:
+                print("Wrong password (CRC check error)")
+
+            print("Keyfiles restored !")
+
         else:
             self.__manual()
 

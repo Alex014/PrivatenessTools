@@ -145,6 +145,15 @@ class User(NessKey):
     def getVerifyKeys(self):
         return self.__verify_keys
 
+    def getPrivateKey(self):
+        return self.__private_keys[self.__current_key]
+
+    def getPublicKey(self):
+        return self.__public_keys[self.__current_key]
+
+    def getVerifyKey(self):
+        return self.__verify_keys[self.__current_key]
+
     def changeKeypair(self, new_index: int):
         if new_index > (len(self.__private_keys) - 1) or new_index < 0:
             raise KeyIndexException(new_index, (len(self.__private_keys) - 1) )

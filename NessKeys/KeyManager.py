@@ -1,5 +1,7 @@
 import os
+import glob
 import sys
+from pathlib import Path
 from base64 import b64encode
 from base64 import b64decode
 import json
@@ -32,6 +34,11 @@ class KeyManager:
     def __init__(self, storage: Storage, key_maker: KeyMaker):
         self.__storage = storage
         self.__key_maker = key_maker
+        self.directory = str(Path.home()) + "/.privateness-keys"
+
+
+    def fileExists(self, filename: str) -> bool:
+        return os.path.exists(self.directory + "/" + filename)
 
     def createUserKey(self, username: str, keypairs: int, tags: str, entropy: int):
         key_pairs = self.__keypairs(keypairs, entropy)
@@ -142,7 +149,7 @@ class KeyManager:
 
         return True
 
-    def unpackKeys(self, filename: str, password: str = 'qwerty123'):
+    def unpackKeys(self, filename: str, password: str = 'qwerty123', dir = ""):
         cryptor = CryptorMaker.make('salsa20')
         pc = PasswordCryptor(cryptor, password)
 
@@ -158,7 +165,7 @@ class KeyManager:
             keydata = json.loads(original_key)
             key = self.__key_maker.make(keydata)
             # Save Key
-            self.__storage.save(key.compile(), key.getFilename())
+            self.__storage.save(key.compile(), dir + key.getFilename())
             i += 1
 
         return True
@@ -193,6 +200,64 @@ class KeyManager:
         encrypted = Encrypted(keydata)
         
         self.__storage.save(encrypted.compile(), outFilename)
+
+    def init(self, user_keyfile: str):
+        userdata = self.__storage.restore(user_keyfile)
+        userkey = UserKey(userdata)
+
+        userdata = {
+            "filedata": {
+                "vendor": "Privateness",
+                "type": "key",
+                "for": "user-local"
+            },
+            "username": userkey.getUsername(),
+            "nonce": userkey.getNonce(),
+            "keys": {
+                "private": userkey.getPrivateKey(),
+                "public": userkey.getPublicKey(),
+                "verify": userkey.getPrivateKey(),
+            },
+        }
+
+        localkey = UserLocal(userdata)
+
+        if not os.path.exists(self.directory):
+            os.mkdir(self.directory)
+
+        user_local_filename= self.directory + "/" + userkey.getUsername() + ".local.key.json"
+        self.__storage.save(localkey.compile(), user_local_filename)
+
+    def save(self, outFilename: str, password: str = 'qwerty123'):
+        keysFiles = glob.glob(self.directory + "/*.key.json" )
+
+        keysFilesWithDir = []
+        for keyFile in keysFiles:
+            keysFilesWithDir.append(keyFile)
+        
+        return self.packKeys(keysFilesWithDir, outFilename, password)
+
+    def restore(self, inFilename: str, password: str = 'qwerty123'):
+        return self.unpackKeys(inFilename, password, self.directory + '/')
+
+    def __zerofill(self, filename: str):
+        sz = os.path.getsize(filename)
+        strz = "".zfill(sz)
+        
+        f = open(filename, 'w')
+        f.write(strz)
+        f.close()
+        pass
+
+    def eraise(self, filename: str):
+        self.__zerofill(filename)
+        os.remove(filename)
+
+    def eraiseAll(self):
+        keysFiles = glob.glob(self.directory + "/*.key.json" )
+
+        for keyFile in keysFiles:
+            self.eraise(keyFile)
 
     def __keypair(self, entropy: int):
 

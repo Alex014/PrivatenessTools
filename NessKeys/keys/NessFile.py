@@ -1,5 +1,5 @@
-import interfaces.Leaf as Leaf
-import exceptions.LeafBuildException as LeafBuildException
+from NessKeys.interfaces.Leaf import Leaf
+from NessKeys.exceptions.LeafBuildException import LeafBuildException
 
 class NessFile(Leaf):
 

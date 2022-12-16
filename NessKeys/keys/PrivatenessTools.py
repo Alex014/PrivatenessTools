@@ -1,4 +1,5 @@
 from NessKeys.interfaces.NessKey import NessKey
+from NessKeys.keys.NessFile import NessFile
 from NessKeys.exceptions.LeafBuildException import LeafBuildException
 
 class PrivatenessTools(NessKey):
@@ -59,21 +60,53 @@ class PrivatenessTools(NessKey):
 
     def getFilename(self):
         return "privateness-tools.json"
-
-    def getAllFiles(self):
-        return self.__files
-
+        
     def getFiles(self):
-        return self.__files[self.__current_node]
+        if self.__current_node not in self.__files:
+            self.__file[self.__current_node] = {}
 
-    def getFile(self, filename: str) -> dict:
-        return self.__files[self.__current_node][filename]
+        files = []
 
-    def getMyNodes(self):
+        for file in self.__file[self.__current_node]:
+            files.append(NessFile(file))
+
+        return files
+
+    def getFile(self, filename: str) -> NessFile:
+        file = self.__files[self.__current_node][filename]
+
+        return NessFile(file)
+
+    def addFile(self, filename: str, file: NessFile):
+        if self.__current_node not in self.__files:
+            self.__file[self.__current_node] = {}
+
+        if filename not in self.__files:
+            self.__files[self.__current_node][filename] = NessFile.compile()
+
+    def removeFile(self, filename: str):
+        if filename in self.__files:
+            del self.__files[self.__current_node][filename]
+
+    def getMyNodes(self) -> list:
         return self.__my_nodes
 
-    def getCurrentNode(self):
+    def getCurrentNode(self) -> str:
         return self.__current_node
 
-    def changeNode(self, new_node: str):
-        self.__current_node = new_node
+    def changeNode(self, new_node: str) -> bool:
+        if self.__my_nodes.count(new_node) > 0:
+            self.__current_node = new_node
+            return True
+        else:
+            return False
+
+    def addNode(self, url: str):
+        self.__my_nodes.append(url)
+
+        if url in self.__files:
+            self.__files[url] = {}
+
+    def removeNode(self, url: str):
+        self.__my_nodes.remove(url)
+        del self.__files[self.__current_node]
