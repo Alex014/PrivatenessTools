@@ -1,0 +1,2 @@
+class EmptyNodesList(Exception):
+    pass

@@ -1,0 +1,2 @@
+class BlockchainSettingsFileNotExist(Exception):
+    pass

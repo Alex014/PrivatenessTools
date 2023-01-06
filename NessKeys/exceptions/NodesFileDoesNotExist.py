@@ -1,0 +1,2 @@
+class NodesFileDoesNotExist(Exception):
+    pass

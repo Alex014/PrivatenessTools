@@ -57,7 +57,33 @@ Privateness console tools
  restore <encrypted keyfile>
 ```
 ## Node management
-### TODO ...
+### nodes-update.py
+```
+*** Remote nodes update UTILITY
+### DESCRIPTION:
+  Service node list update from blockchain or remote node
+### USAGE:
+#### Update from blockchain (if RPC connection settings olready exist)
+ python nodes-update.py blockchain
+ python nodes-update.py blk
+#### Update from blockchain (connect to Emercoin RPC and save connection settings)
+ python nodes-update.py blk rpc-host rpc-port rpc-user rpc-password
+#### Update from remote node
+ python nodes-update.py node <remote-node-url>
+#### Update from remote node (random node fron existing nodes list)
+ python nodes-update.py node
+#### Auto update (try to update from random node, on error try to update from blockchain
+ python nodes-update.py
+```
+### node.py
+```
+*** Node manipulation
+### USAGE:
+#### List all nodes (previously fetched from blockchain or remote node):
+ python node.py list
+#### Set current node (node name usualy equals node url):
+ python node.py set <node-name>
+```
 
 ## Files management (Privateness DISK)
 ### TODO ...

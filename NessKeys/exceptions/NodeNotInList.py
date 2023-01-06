@@ -1,0 +1,2 @@
+class NodeNotInList(Exception):
+    pass

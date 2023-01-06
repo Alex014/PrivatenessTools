@@ -4,8 +4,10 @@ from NessKeys.interfaces.KeyMaker import KeyMaker
 from NessKeys.keys.Node import Node as NodeKey
 from NessKeys.keys.User import User as UserKey
 from NessKeys.keys.UserLocal import UserLocal
-from NessKeys.keys.PrivatenessTools import PrivatenessTools
 from NessKeys.keys.Encrypted import Encrypted
+from NessKeys.keys.BlockchainRPC import BlockchainRPC
+from NessKeys.keys.Nodes import Nodes
+from NessKeys.keys.MyNodes import MyNodes
 from NessKeys.exceptions.LeafBuildException import LeafBuildException
 
 class KeyMakerNess(KeyMaker):
@@ -30,7 +32,11 @@ class KeyMakerNess(KeyMaker):
             return UserLocal(keydata)
         elif vendor == "Privateness" and _type == 'encrypted-keys':
             return Encrypted(keydata)
-        elif vendor == "Privateness" and _type == 'application' and _for == 'privateness-tools':
-            return PrivatenessTools(keydata)
+        elif vendor == "Privateness" and _type == 'config' and _for == 'blockchain':
+            return BlockchainRPC(keydata)
+        elif vendor == "Privateness" and _type == 'data' and _for == 'nodes-list':
+            return Nodes(keydata)
+        elif vendor == "Privateness" and _type == 'service' and _for == 'node':
+            return MyNodes(keydata)
 
         return False

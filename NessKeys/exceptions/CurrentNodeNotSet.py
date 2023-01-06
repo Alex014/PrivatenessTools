@@ -1,0 +1,2 @@
+class CurrentNodeNotSet(Exception):
+    pass
