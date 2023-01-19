@@ -1,5 +1,10 @@
 # PrivatenessTools
 Privateness console tools
+
+## Instalation
+`git clone https://github.com/Alex014/PrivatenessTools`
+`pip install requests pynacl pycryptodome validators lxml`
+
 ## Key generation
 ### keygen.py
 ```
