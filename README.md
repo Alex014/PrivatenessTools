@@ -50,6 +50,10 @@ Privateness console tools
  nvs <keyfile>
 #### Show <worm> for blockchain (if there are any)
  worm <keyfile>
+### Initialize local user keyfile (~/.privateness-keys/localuser.key.json) from main user keyfile
+ init <username.key.json>
+### Initialize local node keyfile (node.json) from main node file
+ node <node-name.key.json>
 #### Show all encrypted keys (if there are any)
  list <keyfile>
 ### Pack keyfiles into encrypted keyfile
@@ -60,6 +64,8 @@ Privateness console tools
  save <encrypted keyfile>
 ### Restore local keyfiles from encrypted keyfile
  restore <encrypted keyfile>
+### Eraise keyfile or all local keyfiles (fill with 0)
+ eraise [encrypted keyfile]
 ```
 ## Node management
 ### nodes-update.py
@@ -86,8 +92,17 @@ Privateness console tools
 ### USAGE:
 #### List all nodes (previously fetched from blockchain or remote node):
  python node.py list
-#### Set current node (node name usualy equals node url):
+#### Set current node (you will be registered in that node):
  python node.py set <node-name>
+```
+### user.py
+```
+*** User manipulation
+### USAGE:
+#### List all nodes (previously fetched from blockchain or remote node):
+ python node.py list
+#### Funds withdraw
+ TODO ...
 ```
 
 ## Files management (Privateness DISK)
