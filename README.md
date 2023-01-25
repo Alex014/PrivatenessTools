@@ -5,6 +5,13 @@ Privateness console tools
 `git clone https://github.com/Alex014/PrivatenessTools`
 `pip install requests pynacl pycryptodome validators lxml`
 
+## Initialisation
+ * Generate user (keygen.py)
+ * Register user in blockchain (`key.py nvs` and `key.py worm`)
+ * Initialise local keys (key.py init)
+ * Update nodes list (nodes-update.py)
+ * Register in your node (python node.py set <node-name>)
+
 ## Key generation
 ### keygen.py
 ```
