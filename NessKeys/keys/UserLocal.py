@@ -57,8 +57,11 @@ class UserLocal(NessKey):
     def print(self):
         return "Privateness Local User Key <{}>".format(self.__username)
 
+    def filename():
+        return "userlocal.key.json"
+
     def getFilename(self):
-        return self.__username + "local.key.json"
+        return "userlocal.key.json"
 
     def getUsername(self):
         return self.__username

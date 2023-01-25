@@ -56,9 +56,8 @@ class Nodes(NessKey):
     def setNodes(self, nodes: dict):
         self.__nodes = nodes
 
-    def findNode(self, url: str) -> dict:
-        # for node in self.__nodes:
-        #     if url == node['url']:
-        #         return node
-
-        return self.__nodes['url']
+    def findNode(self, node_name: str) -> dict:
+        if node_name in self.__nodes:
+            return self.__nodes[node_name]
+        else:
+            return False

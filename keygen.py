@@ -14,9 +14,7 @@ import lxml.etree as etree
 
 import uuid
 import NessKeys.Prng as prng
-from NessKeys.KeyManager import KeyManager
-from NessKeys.StorageJson import StorageJson
-from NessKeys.KeyMakerNess import KeyMakerNess
+from framework.Container import Container
 
 from NessKeys.exceptions.KeyIndexException import KeyIndexException
 
@@ -41,7 +39,7 @@ class Keygen:
         print("  user <username> <Keypair count> \"coma,separated,tags\" <Entropy level>")
         print("  Example: $ python keygen.py user user1 10 \"Hello,World\" 5")
         print("#### Generate node")
-        print("  node <Node URL> <Tariff> master-user-name \"coma,separated,tags\"  <Entropy level>")
+        print("  node <Node name or URL> <Tariff> master-user-name \"coma,separated,tags\"  <Entropy level>")
         print("  Example: $ python keygen.py node http://my-node.net 111 master \"Hello,World\" 5")
         print("#### Change user's keypair")
         print("  change <User Key File> <new keypair index>")
@@ -77,9 +75,7 @@ class Keygen:
                 print("<Entropy level> must be integer")
                 return False
 
-            storage = StorageJson()
-            maker = KeyMakerNess()
-            manager = KeyManager(storage, maker)
+            manager = Container.KeyManager()
 
             return manager.createUserKey(username, keypair_count, tags, entropy)
 
@@ -104,9 +100,7 @@ class Keygen:
                 print("<Entropy level> must be integer")
                 return False
 
-            storage = StorageJson()
-            maker = KeyMakerNess()
-            manager = KeyManager(storage, maker)
+            manager = Container.KeyManager()
 
             return manager.createNodeKey(url, tariff, master_user, tags, entropy)
 
@@ -119,9 +113,7 @@ class Keygen:
                 print("<new keypair index> must be integer")
                 return False
 
-            storage = StorageJson()
-            maker = KeyMakerNess()
-            manager = KeyManager(storage, maker)
+            manager = Container.KeyManager()
 
             try:
                 manager.changeUserKeypair(key_filename, key_index)

@@ -38,7 +38,7 @@ from NessKeys.exceptions.NodesFileDoesNotExist import NodesFileDoesNotExist
 from NessKeys.exceptions.EmptyNodesList import EmptyNodesList
 from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.NodeNotInList import NodeNotInList
-
+from NessKeys.exceptions.UserLocalKeyFileDoesNotExist import UserLocalKeyFileDoesNotExist
 class KeyManager:
 
     def __init__(self, storage: Storage, key_maker: KeyMaker):
@@ -209,6 +209,19 @@ class KeyManager:
         
         self.__storage.save(encrypted.compile(), outFilename)
 
+    def hasUserLocal(self) -> bool:
+        return self.fileExists(UserLocal.filename())
+
+    def getUserLocalKey(self):
+        filename = self.fileName(UserLocal.filename())
+
+        if os.path.exists(filename):
+            keydata = self.__storage.restore(filename)
+            return UserLocal(keydata)
+        else:
+            raise UserLocalKeyFileDoesNotExist()
+
+
     def init(self, user_keyfile: str):
         userdata = self.__storage.restore(user_keyfile)
         userkey = UserKey(userdata)
@@ -224,7 +237,7 @@ class KeyManager:
             "keys": {
                 "private": userkey.getPrivateKey(),
                 "public": userkey.getPublicKey(),
-                "verify": userkey.getPrivateKey(),
+                "verify": userkey.getVerifyKey(),
             },
         }
 
@@ -233,8 +246,27 @@ class KeyManager:
         if not os.path.exists(self.directory):
             os.mkdir(self.directory)
 
-        user_local_filename= self.directory + "/" + userkey.getUsername() + ".local.key.json"
-        self.__storage.save(localkey.compile(), user_local_filename)
+        self.__storage.save(localkey.compile(), self.fileName(UserLocal.filename()))
+
+
+    def init_node(self, node_keyfile: str):
+        keydata = self.__storage.restore(node_keyfile)
+        nodekey = NodeKey(keydata)
+
+        node_data = {
+            "master-user": nodekey.getMasterUser(),
+            "nonce": nodekey.getNonce(),
+            "private": nodekey.getPrivateKey(),
+            "public": nodekey.getPublicKey(),
+            "tariff": nodekey.getTariff(),
+            "period": "7200",
+            "delta": "1200",
+            "url": nodekey.getUrl(),
+            "verify": nodekey.getVerifyKey(),
+            "slots": 10
+        }
+
+        self.__storage.save(node_data, 'node.json')
 
     def save(self, outFilename: str, password: str = 'qwerty123'):
         keysFiles = glob.glob(self.directory + "/*.json" )
@@ -249,35 +281,16 @@ class KeyManager:
         return self.unpackKeys(inFilename, password, self.directory + '/')
 
 
-    def hasBlockchainConfig(self) -> dict:
-        return os.path.fileExists(BlockchainRPC.filename())
+    def hasBlockchainSettings(self) -> dict:
+        return self.fileExists(BlockchainRPC.filename())
 
 
-    def hasNodesList(self) -> dict:
-        return os.path.fileExists(Nodes.filename())
+    def hasNodesList(self) -> bool:
+        return self.fileExists(Nodes.filename())
 
-
-    def getBlockchainConfig(self) -> dict:
-        blkdata = self.__storage.restore(self.fileName(BlockchainRPC.filename()))
-        blk = BlockchainRPC(blkdata)
-        return blk.compile()
-
-    def saveBlockchainConfig(self, host: str, port: int, user: str, password: str):
-        blkdata = {
-            "filedata": {
-                "vendor": "Privateness",
-                "type": "service",
-                "for": "node"
-            },
-            "rpc-host": host,
-            "rpc-port": port,
-            "rpc-user": user,
-            "rpc-password": password,
-        }
-
-        blk = BlockchainRPC(blkdata)
-        self.__storage.save(blk.compile(), self.fileName(BlockchainRPC.filename()))
-
+    def getNodesKey(self):
+        nodedata = self.__storage.restore(self.fileName(Nodes.filename()))
+        return Nodes(nodedata)
 
     def getNodesList(self) -> list:
         nodedata = self.__storage.restore(self.fileName(Nodes.filename()))
@@ -314,7 +327,7 @@ class KeyManager:
 
         self.__storage.save(key.compile(), self.fileName(BlockchainRpcKey.filename()))
 
-    def loadBlockchainSettings(self) -> dict:
+    def getBlockchainSettings(self) -> dict:
         filename = self.fileName(BlockchainRpcKey.filename())
 
         if not os.path.exists(filename):
@@ -349,41 +362,89 @@ class KeyManager:
                 return nodes[url]
             cnt += 1
 
-    def getCurrentNodeName(self) -> str:
-        filename = self.fileName(MyNodes.filename())
+    def hasMyNodes(self) -> bool:
+        return os.path.exists( self.fileName(MyNodes.filename()) )
 
-        if not os.path.exists(filename):
-            raise MyNodesFileDoesNotExist()
-
-        keydata = self.__storage.restore(filename)
-        key = MyNodes(keydata)
-        return key.getCurrentNode()
-
-    def getCurrentNode(self) -> dict:
-        nodes = self.listNodes()
-
-        return nodes[self.getCurrentNodeName()]
-
-    def saveCurrentNode(self, node_name: str):
-        nodes = self.listNodes()
-
-        if not node_name in nodes:
-            raise NodeNotInList()
-
+    def initMyNodes(self, node_name: str, user_shadowname: str):
         keydata = {
             "filedata": {
-                "vendor": "Privateness",
+                "for": "node",
                 "type": "service",
-                "for": "node"
+                "vendor": "Privateness"
             },
-            "my-nodes": {node_name: {}},
             "current-node": node_name,
+            "my-nodes": {
+                node_name: {
+                    "shadowname": user_shadowname
+                }
+            }
         }
 
         key = MyNodes(keydata)
 
         self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
 
+    def hasNodesList(self) -> bool:
+        return os.path.exists( self.fileName(Nodes.filename()) )
+
+    def getMyNodesKey(self):
+        filename = self.fileName(MyNodes.filename())
+
+        if not os.path.exists(filename):
+            raise MyNodesFileDoesNotExist()
+
+        keydata = self.__storage.restore(filename)
+
+        return MyNodes(keydata)
+
+
+    def isNodeInMyNodes(self, node_name: str) -> bool:
+        key = self.getMyNodesKey()
+
+        return (key.findNode(node_name) != False)
+
+    def isNodeInNodesList(self, node_name: str) -> bool:
+        filename = self.fileName(Nodes.filename())
+
+        if not os.path.exists(filename):
+            raise NodesFileDoesNotExist()
+
+        keydata = self.__storage.restore(filename)
+        key = Nodes(keydata)
+
+        return (key.findNode(node_name) != False)
+
+    def getCurrentNodeName(self) -> str:
+        if self.hasMyNodes():
+            key = self.getMyNodesKey()
+            return key.getCurrentNode()
+        else:
+            return False
+
+    def getCurrentNode(self) -> dict:
+        nodes = self.listNodes()
+
+        return nodes[self.getCurrentNodeName()]
+
+    def saveCurrentNode(self, node_name: str, user_shadowname: str):
+        key = self.getMyNodesKey()
+
+        if not key.findNode(node_name):
+            key.addNode(node_name, user_shadowname)
+        else:
+            key.updateNode(node_name, user_shadowname)
+
+        self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+
+
+    def changeCurrentNode(self, node_name: str):
+        key = self.getMyNodesKey()
+        if not key.findNode(node_name):
+            raise NodeNotInList()
+
+        key.changeCurrentNode(node_name)
+
+        self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
 
     def __zerofill(self, filename: str):
         sz = os.path.getsize(filename)

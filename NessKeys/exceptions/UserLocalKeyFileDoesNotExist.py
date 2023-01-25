@@ -1,0 +1,2 @@
+class UserLocalKeyFileDoesNotExist(Exception):
+    pass

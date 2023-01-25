@@ -16,9 +16,6 @@ import lxml.etree as etree
 
 import uuid
 import NessKeys.Prng as prng
-from NessKeys.KeyManager import KeyManager
-from NessKeys.StorageJson import StorageJson
-from NessKeys.KeyMakerNess import KeyMakerNess
 from NessKeys.cryptors.Salsa20 import Salsa20
 
 from NessKeys.exceptions.BlockchainSettingsFileNotExist import BlockchainSettingsFileNotExist
@@ -35,7 +32,10 @@ import getpass
 import lxml.etree as etree
 import requests
 
-from NessKeys.BlockchainRPC import BlockchainRPC
+from ness.BlockchainRPC import BlockchainRPC
+
+from framework.Container import Container
+from services.ServicesManager import ServicesManager
 
 class NodesUpdater:
 
@@ -55,11 +55,6 @@ class NodesUpdater:
         print(" python nodes-update.py node")
         print("#### Auto update (try to update from random node, on error try to update from blockchain")
         print(" python nodes-update.py")
-
-    def __getKM(self):
-        storage = StorageJson()
-        maker = KeyMakerNess()
-        return KeyManager(storage, maker)
 
     def listNodesFromBlockchain(self, ip: str, port: int, user: str, password: str) -> dict:
         blk = BlockchainRPC(ip, port, user, password)
@@ -108,7 +103,7 @@ class NodesUpdater:
     def listNodesFromRemoteNode(self, node_url: str) -> dict:
         print("### Updating nodes list from remote node {}".format(node_url))
 
-        result = json.loads(requests.get(node_url + '/node/nodes').text)
+        result = ServicesManager.nodesList(node_url)
 
         if result['result'] == 'data':
             print("+ {}".format(len(result['data'])))
@@ -119,11 +114,11 @@ class NodesUpdater:
         raise NodeError("Unknown error")
 
     def updateNodesFromBlockchain(self):
-        km = self.__getKM()
+        km = Container.KeyManager()
 
         print("### Updating nodes list from blockchain")
 
-        blk = km.loadBlockchainSettings()
+        blk = km.getBlockchainSettings()
         nodes = self.listNodesFromBlockchain(blk['host'], blk['port'], blk['user'], blk['password'])
         # print(nodes)
         km.saveNodesList(nodes)
@@ -131,7 +126,7 @@ class NodesUpdater:
         return True
 
     def updateNodesFromRemoteNode(self):
-        km = self.__getKM()
+        km = Container.KeyManager()
 
         node = km.getRandomNode()
         # print(node)
@@ -167,7 +162,7 @@ class NodesUpdater:
                 print ("* Error '{}'".format(str(e)))
 
     def process(self):
-        km = self.__getKM()
+        km = Container.KeyManager()
 
         if len(sys.argv) == 6 and (sys.argv[1].lower() == 'blk' or sys.argv[1].lower() == 'blockchain'):
             host = sys.argv[2]

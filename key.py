@@ -16,9 +16,7 @@ import lxml.etree as etree
 
 import uuid
 import NessKeys.Prng as prng
-from NessKeys.KeyManager import KeyManager
-from NessKeys.StorageJson import StorageJson
-from NessKeys.KeyMakerNess import KeyMakerNess
+from framework.Container import Container
 from NessKeys.cryptors.Salsa20 import Salsa20
 
 from NessKeys.exceptions.KeyIndexException import KeyIndexException
@@ -44,6 +42,13 @@ class Key:
         print(" nvs <keyfile>")
         print("#### Show <worm> for blockchain (if there are any)")
         print(" worm <keyfile>")
+
+        print("### Initialize local user keyfile (~/.privateness-keys/localuser.key.json) from main user keyfile")
+        print(" init <username.key.json>")
+
+        print("### Initialize local node keyfile (node.json) from main node file")
+        print(" node <node-name.key.json>")
+
         print("#### Show all encrypted keys (if there are any)")
         print(" list <keyfile>")
         print("### Pack keyfiles into encrypted keyfile")
@@ -57,19 +62,14 @@ class Key:
         print("### Eraise keyfile or all local keyfiles (fill with 0)")
         print(" eraise [encrypted keyfile]")
 
-        km = self.__getKM()
+        km = Container.KeyManager()
         print("\nKeys directory: " + km.directory)
-
-    def __getKM(self):
-        storage = StorageJson()
-        maker = KeyMakerNess()
-        return KeyManager(storage, maker)
 
     def process(self):
         if len(sys.argv) == 3 and sys.argv[1].lower() == 'show':
             filename = sys.argv[2]
             try:
-                km = self.__getKM()
+                km = Container.KeyManager()
                 print(km.showKey(filename))
             except json.decoder.JSONDecodeError as e:
                 print("File format error")
@@ -79,7 +79,7 @@ class Key:
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'nvs':
             filename = sys.argv[2]
             try:
-                km = self.__getKM()
+                km = Container.KeyManager()
                 print(km.showKeyNVS(filename))
             except json.decoder.JSONDecodeError as e:
                 print("File format error")
@@ -89,7 +89,7 @@ class Key:
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'worm':
             filename = sys.argv[2]
             try:
-                km = self.__getKM()
+                km = Container.KeyManager()
                 print(km.showKeyWorm(filename))
             except json.decoder.JSONDecodeError as e:
                 print("File format error")
@@ -97,7 +97,7 @@ class Key:
                 print("File format error: \"{}\" path: {}".format(e.msg, e.path))
 
         elif len(sys.argv) == 2 and sys.argv[1].lower() == 'list':
-            km = self.__getKM()
+            km = Container.KeyManager()
             files = glob.glob('*.key.json')
             
             for filename in files:
@@ -115,7 +115,7 @@ class Key:
             if os.path.exists(file_arg): 
                 if os.path.isfile(file_arg):
                     # Packed file listing
-                    km = self.__getKM()
+                    km = Container.KeyManager()
 
                     password = getpass.getpass("Type password:")
 
@@ -128,7 +128,7 @@ class Key:
                 else:
                     # Directory listing
 
-                    km = self.__getKM()
+                    km = Container.KeyManager()
                     path = file_arg + '/*.key.json'
                     files = glob.glob(path)
                     
@@ -142,7 +142,7 @@ class Key:
                             print("File format error: \"{}\" path: {}".format(e.msg, e.path))
 
         elif len(sys.argv) == 4 and sys.argv[1].lower() == 'pack':
-            km = self.__getKM()
+            km = Container.KeyManager()
             packet_keyfile = sys.argv[3]
             keys = sys.argv[2]
 
@@ -159,7 +159,7 @@ class Key:
                 print("File format error: \"{}\" path: {}".format(e.msg, e.path))
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'unpack':
-            km = self.__getKM()
+            km = Container.KeyManager()
 
             password = getpass.getpass("Type password:")
 
@@ -171,21 +171,27 @@ class Key:
                 print("Wrong password (CRC check error)")
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'init':
-            km = self.__getKM()
+            km = Container.KeyManager()
             user_keyfile = sys.argv[2]
 
             km.init(user_keyfile)
 
+        elif len(sys.argv) == 3 and sys.argv[1].lower() == 'node':
+            km = Container.KeyManager()
+            node_keyfile = sys.argv[2]
+
+            km.init_node(node_keyfile)
+
         elif len(sys.argv) == 2 and sys.argv[1].lower() == 'eraise':
             answer = input("Eraise all local keys y/n :")
             if answer.lower() == 'y':
-                km = self.__getKM()
+                km = Container.KeyManager()
                 km.eraiseAll()
 
             print("Keyfiles eraised !")
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'eraise':
-            km = self.__getKM()
+            km = Container.KeyManager()
             keyfile = sys.argv[2]
 
             if os.path.exists(keyfile):
@@ -197,7 +203,7 @@ class Key:
                 print ("File '%s' does not exist" % (keyfile))
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'save':
-            km = self.__getKM()
+            km = Container.KeyManager()
             keyfile = sys.argv[2]
 
             password = getpass.getpass("Type password:")
@@ -213,7 +219,7 @@ class Key:
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'restore':
             keyfile = sys.argv[2]
-            km = self.__getKM()
+            km = Container.KeyManager()
 
             password = getpass.getpass("Type password:")      
 

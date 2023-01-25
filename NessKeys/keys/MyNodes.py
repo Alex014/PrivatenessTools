@@ -56,15 +56,24 @@ class MyNodes(NessKey):
     def getCurrentNode(self) -> str:
         return self.__current_node
 
-    def changeNode(self, url: str) -> bool:
-        if url in self.__my_nodes:
-            self.__current_node = url
+    def findNode(self, node_name: str):
+        if node_name in self.__my_nodes:
+            return self.__my_nodes[node_name]
+        else:
+            return False
+
+    def changeCurrentNode(self, node_name: str) -> bool:
+        if node_name in self.__my_nodes:
+            self.__current_node = node_name
             return True
         else:
             return False
 
     def addNode(self, url: str, user_shadowname: str):
-        del self.__my_nodes[url]
+        self.__my_nodes[url] = {'shadowname': user_shadowname}
+
+    def updateNode(self, url: str, user_shadowname: str):
+        self.__my_nodes[url].update({'shadowname': user_shadowname})
 
     def removeNode(self, url: str):
         del self.__my_nodes[url]
