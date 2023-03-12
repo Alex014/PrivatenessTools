@@ -35,7 +35,6 @@ import requests
 from ness.BlockchainRPC import BlockchainRPC
 
 from framework.Container import Container
-from services.ServicesManager import ServicesManager
 
 class NodesUpdater:
 
@@ -103,7 +102,8 @@ class NodesUpdater:
     def listNodesFromRemoteNode(self, node_url: str) -> dict:
         print("### Updating nodes list from remote node {}".format(node_url))
 
-        result = ServicesManager.nodesList(node_url)
+        ns = Container.NodeService()
+        result = ns.nodesList(node_url)
 
         if result['result'] == 'data':
             print("+ {}".format(len(result['data'])))

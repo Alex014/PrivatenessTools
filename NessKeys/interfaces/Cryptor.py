@@ -11,3 +11,6 @@ class Cryptor:
 
     def getBlockSize(self) -> int:
         pass
+
+    def getBlockAddition(self) -> int:
+        pass

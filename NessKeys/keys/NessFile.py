@@ -14,20 +14,17 @@ class NessFile(Leaf):
         if not("shadowname" in keydata):
             raise LeafBuildException("No shadowname parameter", "/shadowname")
 
-        if not("directory" in keydata):
-            raise LeafBuildException("No directory parameter", "/directory")
-
         self.__cipher = keydata['cipher']
         self.__cipher_type = keydata['cipher-type']
         self.__shadowname = keydata['shadowname']
-        self.__directory = keydata['directory']
+        self.__status = 'c'
 
     def compile(self) -> dict:
         filedata = {
             "cipher": self.__cipher,
             "cipher-type": self.__cipher_type,
             "shadowname": self.__shadowname,
-            "directory": self.__directory,
+            "status": self.__status,
         }
 
         return filedata
@@ -41,5 +38,5 @@ class NessFile(Leaf):
     def getShadowname(self):
         return self.__shadowname
 
-    def getDirectory(self):
-        return self.__directory
+    def getStatus(self):
+        return self.__status

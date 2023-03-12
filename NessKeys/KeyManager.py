@@ -16,6 +16,8 @@ import validators
 import lxml.etree as etree
 
 import NessKeys.interfaces.NessKey as NessKey
+from NessKeys.keys.Files import Files as FilesKey
+from NessKeys.keys.Directories import Directories as DirectoriesKey
 from NessKeys.keys.User import User as UserKey
 from NessKeys.keys.Node import Node as NodeKey
 from NessKeys.keys.UserLocal import UserLocal
@@ -39,6 +41,9 @@ from NessKeys.exceptions.EmptyNodesList import EmptyNodesList
 from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.NodeNotInList import NodeNotInList
 from NessKeys.exceptions.UserLocalKeyFileDoesNotExist import UserLocalKeyFileDoesNotExist
+from NessKeys.exceptions.FilesKeyDoesNotExist import FilesKeyDoesNotExist
+from NessKeys.exceptions.DirectoriesKeyDoesNotExist import DirectoriesKeyDoesNotExist
+
 class KeyManager:
 
     def __init__(self, storage: Storage, key_maker: KeyMaker):
@@ -51,6 +56,9 @@ class KeyManager:
 
     def fileExists(self, filename: str) -> bool:
         return os.path.exists(self.fileName(filename))
+
+    def saveKey(self, key: NessKey):
+        self.__storage.save(key.compile(), self.fileName(key.getFilename()))
 
     def createUserKey(self, username: str, keypairs: int, tags: str, entropy: int):
         key_pairs = self.__keypairs(keypairs, entropy)
@@ -384,9 +392,6 @@ class KeyManager:
 
         self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
 
-    def hasNodesList(self) -> bool:
-        return os.path.exists( self.fileName(Nodes.filename()) )
-
     def getMyNodesKey(self):
         filename = self.fileName(MyNodes.filename())
 
@@ -445,6 +450,194 @@ class KeyManager:
         key.changeCurrentNode(node_name)
 
         self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+
+    def hasFilesKey(self) -> bool:
+        return self.hasFiles()
+
+    def hasDirectoriesKey(self) -> bool:
+        return os.path.exists( self.fileName(DirectoriesKey.filename()) )
+
+    def initFiles(self):
+        keydata = {
+            "filedata": {
+                "vendor": "Privateness",
+                "type": "service",
+                "for": "files"
+            },
+            "files": {}
+        }
+
+        key = FilesKey(keydata)
+
+        self.__storage.save(key.compile(), self.fileName(FilesKey.filename()))
+
+    def initDirectories(self):
+        keydata = {
+            "filedata": {
+                "vendor": "Privateness",
+                "type": "service",
+                "for": "files-directories"
+            },
+            "directories": {},
+            "current": {}
+        }
+
+        key = DirectoriesKey(keydata)
+
+        self.__storage.save(key.compile(), self.fileName(DirectoriesKey.filename()))
+
+    def initFilesAndDirectories(self):
+        if not self.hasDirectoriesKey():
+            self.initDirectories()
+
+        if not self.hasFilesKey():
+            self.initFiles()
+
+        node_name = self.getCurrentNodeName()
+
+        dk = self.getDirectoriesKey()
+        dk.initDirectories(node_name)
+
+        fk = self.getFilesKey()
+        fk.initFiles(node_name)
+
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+
+    def getFilesKey(self) -> FilesKey:
+        filename = self.fileName(FilesKey.filename())
+
+        if not os.path.exists(filename):
+            raise FilesKeyDoesNotExist()
+
+        keydata = self.__storage.restore(filename)
+
+        return FilesKey(keydata)
+
+    def getDirectoriesKey(self) -> DirectoriesKey:
+        filename = self.fileName(DirectoriesKey.filename())
+
+        if not os.path.exists(filename):
+            raise DirectoriesKeyDoesNotExist()
+
+        keydata = self.__storage.restore(filename)
+
+        return DirectoriesKey(keydata)
+
+    def isFile(self, ID: str) -> bool:
+        return not ID.isnumeric()
+    
+    def getFile(self, shadowname: str):
+        return self.getFilesKey().getFile(self.getCurrentNodeName(), shadowname)
+    
+    def getDirectory(self, ID: int):
+        return self.getDirectoriesKey().get(self.getCurrentNodeName(), ID)
+    
+    def tree(self):
+        return self.getDirectoriesKey().tree(self.getCurrentNodeName())
+
+    def getDirectoryParentID(self, ID: int):
+        return self.getDirectoriesKey().get_parent_id(self.getCurrentNodeName(), ID)
+
+    def mkdir(self, parent_id: int, name: str):
+        dk = self.getDirectoriesKey()
+        dk.mkdir(self.getCurrentNodeName(), parent_id, name)
+        # print(dk.compile(), self.fileName(dk.getFilename()))
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def getCurrentDir(self) -> int:
+        return self.getDirectoriesKey().getCurrentDir(self.getCurrentNodeName())
+
+    def moveDir(self, ID: int, new_parent_id: int):
+        dk = self.getDirectoriesKey()
+        dk.move(self.getCurrentNodeName(), ID, new_parent_id)
+        self.saveKey(dk)
+
+    def moveFile(self, shadowname: str, directory: int):
+        fk = self.getFilesKey()
+        fk.setFileDirectory(self.getCurrentNodeName(), shadowname, directory)
+        self.saveKey(fk)
+
+    def rename(self, ID: int, new_name: str):
+        dk = self.getDirectoriesKey()
+        dk.rename(self.getCurrentNodeName(), ID, new_name)
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def rmdir(self, ID: str):
+        dk = self.getDirectoriesKey()
+        dk.remove(self.getCurrentNodeName(), int(ID))
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def remove(self, ID: str):
+        if self.isFile(ID):
+            fk = self.getFilesKey()
+            fk.removeFile(self.getCurrentNodeName(), str(ID))
+            self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+        else:
+            dk = self.getDirectoriesKey()
+            dk.remove(self.getCurrentNodeName(), int(ID))
+            self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def cd(self, ID: int):
+        dk = self.getDirectoriesKey()
+        dk.cd(self.getCurrentNodeName(), ID)
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def up(self):
+        dk = self.getDirectoriesKey()
+        dk.up(self.getCurrentNodeName())
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def top(self):
+        dk = self.getDirectoriesKey()
+        dk.top(self.getCurrentNodeName())
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def path(self):
+        dk = self.getDirectoriesKey()
+        dk.path(self.getCurrentNodeName())
+        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+
+    def getDirectories(self, parent_id: int):
+        dk = self.getDirectoriesKey()
+        return dk.getDirectories(self.getCurrentNodeName(), parent_id)
+
+    def ls(self):
+        dk = self.getDirectoriesKey()
+        return dk.ls(self.getCurrentNodeName())
+
+    def addFile(self, filepath: str, cipher: str, cipher_type: str, status: chr, directory: int):
+        fk = self.getFilesKey()
+        shadowname = fk.addFile(self.getCurrentNodeName(), filepath, cipher, cipher_type, status, directory)
+        self.saveKey(fk)
+        return shadowname
+
+    def getFiles(self, directory: int):
+        fk = self.getFilesKey()
+        return fk.getFiles(self.getCurrentNodeName(), directory)
+
+    def removeFile(self, shadowname: str):
+        fk = self.getFilesKey()
+        fk.removeFile(self.getCurrentNodeName(), shadowname)
+        self.saveKey(fk)
+
+    def clearFilePath(self, shadowname: str):
+        fk = self.getFilesKey()
+        fk.clearFilePath(self.getCurrentNodeName(), shadowname)
+        self.saveKey(fk)
+
+    def setFileStatus(self, shadowname: str, status: chr):
+        fk = self.getFilesKey()
+        fk.setFileStatus(self.getCurrentNodeName(), shadowname, status)
+        self.saveKey(fk)
+
+    def setFilePaused(self, shadowname: str):
+        fk = self.getFilesKey()
+        fk.setFilePaused(self.getCurrentNodeName(), shadowname)
+        self.saveKey(fk)
+    
+    def hasFiles(self) -> bool:
+        return os.path.exists( self.fileName(FilesKey.filename()) )
 
     def __zerofill(self, filename: str):
         sz = os.path.getsize(filename)

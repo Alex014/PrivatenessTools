@@ -1,0 +1,2 @@
+class FilesKeyDoesNotExist(Exception):
+    pass

@@ -19,3 +19,6 @@ class Salsa20(Cryptor):
 
     def getBlockSize(self) -> int:
         return 32
+
+    def getBlockAddition(self) -> int:
+        return 8

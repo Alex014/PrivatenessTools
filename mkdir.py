@@ -10,24 +10,32 @@ from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.AuthError import AuthError
 
 import requests
+from prettytable import PrettyTable
 
-class Noder:
+class DIR:
 
     def __manual(self):
-        print("*** User manipulation")
+        print("*** Create directory")
         print("### USAGE:")
-        print("#### Show information about current user (userinfo, balance, etc)")
-        print(" python user.py")
+        print(" python mkdir.py <parent directory ID> <directory name>")
 
     def process(self):
 
-        if len(sys.argv) == 1:
+        if len(sys.argv) == 2 and (sys.argv[1].lower() == 'help' or sys.argv[1].lower() == '-h'):
+            self.__manual()
+
+        elif len(sys.argv) == 3:
+            parent_id = int(sys.argv[1])
+            name = sys.argv[2]
+
             km = Container.KeyManager()
             ns = Container.NodeService()
-            
+
             try:
-                print("# Current node: " + km.getCurrentNodeName())
-                print( sm.userinfo(km.getNodesKey(), km.getMyNodesKey()) )
+                if ns.joined(km.getCurrentNodeName()):
+                    km.mkdir(parent_id, name)
+                    print(" *** Directory {} created".format(name))
+
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")
                 print("RUN python node.py set node-url")
@@ -37,12 +45,12 @@ class Noder:
             except NodeNotFound as e:
                 print("NODE '{}' is not in nodes list".format(e.node))
             except NodeError as e:
-                print("Error on remote node ")
+                print("Error on remote node: " + e.error)
             except AuthError as e:
                 print("Responce verification error")
 
-        elif len(sys.argv) == 2 and (sys.argv[1].lower() == 'help' or sys.argv[1].lower() == '-h'):
+        else:
             self.__manual()
 
-upd = Noder()
+upd = DIR()
 upd.process()

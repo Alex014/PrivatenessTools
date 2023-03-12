@@ -2,7 +2,6 @@ import os
 import sys
 
 from framework.Container import Container
-from services.ServicesManager import ServicesManager
 
 from NessKeys.exceptions.MyNodesFileDoesNotExist import MyNodesFileDoesNotExist
 from NessKeys.exceptions.NodesFileDoesNotExist import NodesFileDoesNotExist
@@ -11,13 +10,14 @@ from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.AuthError import AuthError
 
 import requests
+from prettytable import PrettyTable
 
 class Noder:
 
     def __manual(self):
         print("*** File info")
         print("### USAGE:")
-        print(" python fileinfo.py <file_id>")
+        print(" python fileinfo.py <file_shadowname>")
 
     def process(self):
 
@@ -25,19 +25,32 @@ class Noder:
             self.__manual()
 
         elif len(sys.argv) == 2:
-            file_id = sys.argv[1]
+            file_shadowname = sys.argv[1]
 
             km = Container.KeyManager()
-            sm = ServicesManager(km.getUserLocalKey())
-            
+            ns = Container.NodeService()
+            fs = Container.FilesService()
+        
             try:
-                node_name = km.getCurrentNodeName()
-
-                if sm.joined(km.getNodesKey(), node_name):
-                    fileinfo = sm.fileinfo(km.getNodesKey(), km.getMyNodesKey(), node_name, file_id)
+                if ns.joined(km.getCurrentNodeName()):
+                    fileinfo = fs.fileinfo(file_shadowname)
 
                     print(" *** fileinfo *** ")
-                    print(fileinfo)
+
+                    t = PrettyTable(['Param', 'value'])
+
+                    t.add_row(["File ID", fileinfo['id']])
+                    t.add_row(["Filename", fileinfo['filename']])
+                    t.add_row(["Shadowname", fileinfo['shadowname']])
+                    t.add_row(["Status", fileinfo['status']])
+                    t.add_row(["Filesize (local)", fileinfo['size_local']])
+                    t.add_row(["Filesize (remote)", fileinfo['size_remote']])
+                    t.add_row(["Filepath (local)", fileinfo['filepath']])
+                    t.add_row(["Cipher", fileinfo['cipher']])
+                    t.add_row(["Public link", fileinfo['pub']])
+
+                    t.align = 'l'
+                    print(t)
 
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")

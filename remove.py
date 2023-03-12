@@ -10,14 +10,15 @@ from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.AuthError import AuthError
 
 import requests
+from prettytable import PrettyTable
 
 class Noder:
 
     def __manual(self):
-        print("*** File download")
+        print("*** Remove file")
         print("### USAGE:")
-        print("#### Download file from service node")
-        print(" python download.py <file_shadowname> [path]")
+        print(" python remove.py <file_shadowname>")
+        print(" python remove.py local <file_shadowname>")
 
     def process(self):
 
@@ -25,21 +26,16 @@ class Noder:
             self.__manual()
 
         elif len(sys.argv) == 2:
-            shadowname = sys.argv[1]
+            file_shadowname = sys.argv[1]
 
             km = Container.KeyManager()
             ns = Container.NodeService()
             fs = Container.FilesService()
-            
+        
             try:
                 if ns.joined(km.getCurrentNodeName()):
-                    km.initFilesAndDirectories()
-
-                    km.setFileStatus(shadowname, 'w')
-                    fs.download(shadowname)
-                    km.setFileStatus(shadowname, 'd')
-                    fs.decrypt(shadowname)
-                    km.setFileStatus(shadowname, 'n')
+                    fs.remove(file_shadowname)
+                    km.removeFile(file_shadowname)
 
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")
@@ -54,23 +50,21 @@ class Noder:
             except AuthError as e:
                 print("Responce verification error")
 
-        elif len(sys.argv) == 3:
-            shadowname = sys.argv[1]
-            path = sys.argv[2]
+        elif len(sys.argv) == 3 and sys.argv[1].lower() == 'local':
+            file_shadowname = sys.argv[2]
 
             km = Container.KeyManager()
             ns = Container.NodeService()
             fs = Container.FilesService()
-            
+        
             try:
                 if ns.joined(km.getCurrentNodeName()):
-                    km.initFilesAndDirectories()
-
-                    km.setFileStatus(shadowname, 'w')
-                    fs.download(shadowname, path)
-                    km.setFileStatus(shadowname, 'd')
-                    fs.decrypt(shadowname, path)
-                    km.setFileStatus(shadowname, 'n')
+                    if km.getFile(file_shadowname) == False:
+                        print("Shadowname {} not found".format(file_shadowname))
+                        exit()
+                    
+                    fs.removeLocal(file_shadowname)
+                    km.clearFilePath(file_shadowname)
 
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")

@@ -2,7 +2,6 @@ import os
 import sys
 
 from framework.Container import Container
-from services.ServicesManager import ServicesManager
 
 from NessKeys.exceptions.NodesFileDoesNotExist import NodesFileDoesNotExist
 from NessKeys.exceptions.NodeNotFound import NodeNotFound
@@ -47,12 +46,12 @@ class Noder:
                 if not km.isNodeInNodesList(node_name):
                     raise NodeNotFound(node_name)
 
-                sm = ServicesManager(km.getUserLocalKey())
+                ns = Container.NodeService()
 
-                shadowname = sm.joined(km.getNodesKey(), node_name)
+                shadowname = ns.joined(node_name)
 
                 if shadowname == False:
-                    shadowname = sm.join(km.getNodesKey(), node_name)
+                    shadowname = ns.join(node_name)
                     
                 if not km.hasMyNodes():
                     km.initMyNodes(node_name, shadowname)
@@ -72,7 +71,8 @@ class Noder:
 
         elif len(sys.argv) == 3 and sys.argv[1].lower() == 'info':
             node_url = sys.argv[2]
-            print( ServicesManager.nodeInfo(node_url) )
+            ns = Container.NodeService()
+            print( ns.nodeInfo(node_url) )
 
         elif len(sys.argv) == 2 and (sys.argv[1].lower() == 'help' or sys.argv[1].lower() == '-h'):
             self.__manual()

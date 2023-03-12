@@ -2,7 +2,6 @@ import os
 import sys
 
 from framework.Container import Container
-from services.ServicesManager import ServicesManager
 
 from NessKeys.exceptions.MyNodesFileDoesNotExist import MyNodesFileDoesNotExist
 from NessKeys.exceptions.NodesFileDoesNotExist import NodesFileDoesNotExist
@@ -29,15 +28,14 @@ class Noder:
                 filepath = sys.argv[1]
             else:
                 filepath = '/'
-
-            km = Container.KeyManager()
-            sm = ServicesManager(km.getUserLocalKey())
             
             try:
-                node_name = km.getCurrentNodeName()
+                km = Container.KeyManager()
+                ns = Container.NodeService()
+                fs = Container.FilesService()
 
-                if sm.joined(km.getNodesKey(), node_name):
-                    sm.dir(km.getNodesKey(), km.getMyNodesKey(), node_name, filepath)
+                if ns.joined(km.getCurrentNodeName()):
+                    fs.dir(filepath)
 
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")
