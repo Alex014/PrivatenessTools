@@ -439,7 +439,8 @@ class KeyManager:
         else:
             key.updateNode(node_name, user_shadowname)
 
-        self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+        # self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+        self.saveKey(key)
 
 
     def changeCurrentNode(self, node_name: str):
@@ -449,7 +450,8 @@ class KeyManager:
 
         key.changeCurrentNode(node_name)
 
-        self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+        # self.__storage.save(key.compile(), self.fileName(MyNodes.filename()))
+        self.saveKey(key)
 
     def hasFilesKey(self) -> bool:
         return self.hasFiles()
@@ -501,8 +503,10 @@ class KeyManager:
         fk = self.getFilesKey()
         fk.initFiles(node_name)
 
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
-        self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+        self.saveKey(dk)
+        self.saveKey(fk)
 
     def getFilesKey(self) -> FilesKey:
         filename = self.fileName(FilesKey.filename())
@@ -543,7 +547,8 @@ class KeyManager:
         dk = self.getDirectoriesKey()
         dk.mkdir(self.getCurrentNodeName(), parent_id, name)
         # print(dk.compile(), self.fileName(dk.getFilename()))
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def getCurrentDir(self) -> int:
         return self.getDirectoriesKey().getCurrentDir(self.getCurrentNodeName())
@@ -561,42 +566,50 @@ class KeyManager:
     def rename(self, ID: int, new_name: str):
         dk = self.getDirectoriesKey()
         dk.rename(self.getCurrentNodeName(), ID, new_name)
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def rmdir(self, ID: str):
         dk = self.getDirectoriesKey()
         dk.remove(self.getCurrentNodeName(), int(ID))
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def remove(self, ID: str):
         if self.isFile(ID):
             fk = self.getFilesKey()
             fk.removeFile(self.getCurrentNodeName(), str(ID))
-            self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+            # self.__storage.save(fk.compile(), self.fileName(fk.getFilename()) )
+            self.saveKey(fk)
         else:
             dk = self.getDirectoriesKey()
             dk.remove(self.getCurrentNodeName(), int(ID))
-            self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+            # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+            self.saveKey(dk)
 
     def cd(self, ID: int):
         dk = self.getDirectoriesKey()
         dk.cd(self.getCurrentNodeName(), ID)
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def up(self):
         dk = self.getDirectoriesKey()
         dk.up(self.getCurrentNodeName())
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def top(self):
         dk = self.getDirectoriesKey()
         dk.top(self.getCurrentNodeName())
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def path(self):
         dk = self.getDirectoriesKey()
         dk.path(self.getCurrentNodeName())
-        self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        # self.__storage.save(dk.compile(), self.fileName(dk.getFilename()) )
+        self.saveKey(dk)
 
     def getDirectories(self, parent_id: int):
         dk = self.getDirectoriesKey()
