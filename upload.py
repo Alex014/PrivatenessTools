@@ -23,6 +23,12 @@ class Uploader:
         print("### USAGE:")
         print("#### Upload file on service node")
         print(" python upload.py <path to your file to upload>")
+        print("#### Upload and encrypt file on service node")
+        print(" python upload.py enc <path to your file to upload>")
+        print(" python upload.py encrypt <path to your file to upload>")
+        print("#### Upload file on service node with filename=shadowname")
+        print(" python upload.py pub <path to your file to upload>")
+        print(" python upload.py public <path to your file to upload>")
 
     def process(self):
 
@@ -116,6 +122,39 @@ class Uploader:
             except AuthError as e:
                 print("Responce verification error")
 
+
+        elif len(sys.argv) == 3 and (sys.argv[1].lower() == 'pub' or sys.argv[1].lower() == 'public'):
+            filepath = sys.argv[2]
+
+            if not os.path.exists(filepath):
+                print("File '{}' does not exist".format(filepath))
+                exit()
+
+            km = Container.KeyManager()
+            ns = Container.NodeService()
+            
+            try:
+                if ns.joined(km.getCurrentNodeName()):
+                    km.initFilesAndDirectories()
+                    fs = Container.FilesService()
+
+                    shadowname = os.path.basename(filepath)
+                    km.addFile(filepath, '', '', 'u', km.getCurrentDir(), shadowname)
+                    fs.upload(filepath, shadowname)
+                    km.setFileStatus(shadowname, 'n')
+
+            except MyNodesFileDoesNotExist as e:
+                print("MY NODES file not found.")
+                print("RUN python node.py set node-url")
+            except NodesFileDoesNotExist as e:
+                print("NODES LIST file not found.")
+                print("RUN python nodes-update.py node node-url")
+            except NodeNotFound as e:
+                print("NODE '{}' is not in nodes list".format(e.node))
+            except NodeError as e:
+                print("Error on remote node: " + e.error)
+            except AuthError as e:
+                print("Responce verification error")
         else:
             self.__manual()
 

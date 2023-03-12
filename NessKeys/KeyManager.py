@@ -619,9 +619,9 @@ class KeyManager:
         dk = self.getDirectoriesKey()
         return dk.ls(self.getCurrentNodeName())
 
-    def addFile(self, filepath: str, cipher: str, cipher_type: str, status: chr, directory: int):
+    def addFile(self, filepath: str, cipher: str, cipher_type: str, status: chr, directory: int, shadowname: str = ''):
         fk = self.getFilesKey()
-        shadowname = fk.addFile(self.getCurrentNodeName(), filepath, cipher, cipher_type, status, directory)
+        shadowname = fk.addFile(self.getCurrentNodeName(), filepath, cipher, cipher_type, status, directory, shadowname)
         self.saveKey(fk)
         return shadowname
 

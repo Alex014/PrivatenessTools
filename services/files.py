@@ -197,7 +197,7 @@ class files:
     def fileinfo(self, shadowname: str):
         dir = self.dir()
         info_node = self. __fileinfo(dir[shadowname]['id'])
-        info_local = self.filesKey.getFiles(self.node_name)[shadowname]
+        info_local = self.filesKey.getAllFiles(self.node_name)[shadowname]
 
         fileinfo = {
             'id': info_node['id'],

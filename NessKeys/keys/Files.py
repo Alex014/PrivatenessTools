@@ -100,8 +100,10 @@ class Files(NessKey):
             random.choice(alphabet_1) + \
             random.choice(alphabet_2) + '.' + str(rand)
 
-    def addFile(self, node_name: str, filepath: str, cipher: str, cipher_type: str, status: chr, directory: int) -> str:
-        shadowname = self.__gen_shadowname()
+    def addFile(self, node_name: str, filepath: str, cipher: str, cipher_type: str, status: chr, directory: int, shadowname: str = '') -> str:
+        if shadowname == '':
+            shadowname = self.__gen_shadowname()
+
         filename = os.path.basename(filepath)
 
         self.__files[node_name][shadowname] = {
