@@ -18,6 +18,7 @@ class Noder:
         print("*** Remove file")
         print("### USAGE:")
         print(" python remove.py <file_shadowname>")
+        print("##### Remove local copy of file:")
         print(" python remove.py local <file_shadowname>")
 
     def process(self):
