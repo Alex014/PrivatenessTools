@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python key.py
+python3 key.py
