@@ -1,6 +1,15 @@
 # PrivatenessTools
 Console tools for working with Privateness service node.
-Currently
+
+Currently node and files services are supported.
+
+Node service is for working with remote node.
+
+Files service is for encrypted files storage.
+
+All registration are done by Emercoin blockchain NVS.
+
+All comunication between service node and client is encrypted and signed with ed25519 keypairs.
 
 ## Instalation
 * Required Python 3.10 +
