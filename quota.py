@@ -10,6 +10,8 @@ from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.AuthError import AuthError
 
 import requests
+from prettytable import PrettyTable
+import humanize
 
 class Noder:
 
@@ -31,7 +33,7 @@ class Noder:
                 node_name = km.getCurrentNodeName()
 
                 if ns.joined(node_name):
-                    fs.quota()
+                    quota = fs.quota()
 
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")

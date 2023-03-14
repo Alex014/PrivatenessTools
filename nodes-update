@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python nodes-update.py
+python3 nodes-update.py $1 $2 $3

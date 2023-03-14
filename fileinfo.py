@@ -47,6 +47,7 @@ class Noder:
                     t.add_row(["Filesize (remote)", fileinfo['size_remote']])
                     t.add_row(["Filepath (local)", fileinfo['filepath']])
                     t.add_row(["Cipher", fileinfo['cipher']])
+                    t.add_row(["Encryption key", fileinfo['key']])
                     t.add_row(["Public link", fileinfo['pub']])
 
                     t.align = 'l'

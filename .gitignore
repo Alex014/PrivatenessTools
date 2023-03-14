@@ -132,3 +132,6 @@ dmypy.json
 
 # Key files
 *.key.json
+
+#Encrypted files
+/encrypted

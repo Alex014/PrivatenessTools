@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python user.py
+python3 user.py $1 $2 $3

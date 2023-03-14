@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python node.py
+python3 node.py $1 $2 $3

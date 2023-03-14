@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+python3 cd.py $1 $2 $3

@@ -10,6 +10,8 @@ from NessKeys.exceptions.NodeError import NodeError
 from NessKeys.exceptions.AuthError import AuthError
 
 import requests
+from prettytable import PrettyTable
+import humanize
 
 class Noder:
 
@@ -26,8 +28,31 @@ class Noder:
             ns = Container.NodeService()
             
             try:
-                print("# Current node: " + km.getCurrentNodeName())
-                print( sm.userinfo(km.getNodesKey(), km.getMyNodesKey()) )
+                print(" # Current node: " + km.getCurrentNodeName())
+                userinfo = ns.userinfo()
+
+                t = PrettyTable(['Param', 'value'])
+                t.align = 'l'
+
+                t.add_row(["Payment address", userinfo['addr']])
+                t.add_row(["User counter", userinfo['counter']])
+                t.add_row(["User shadowname", userinfo['shadowname']])
+                t.add_row(["Joined to node", userinfo['joined']])
+                t.add_row(["Active on node", userinfo['is_active']])
+
+                print(t)
+
+                print(" * Balance:")
+
+                t = PrettyTable(['Param', 'value'])
+                t.align = 'l'
+                t.add_row(["Coins", userinfo['balance']['coins']])
+                t.add_row(["Coin-hours (total)", userinfo['balance']['hours']])
+                t.add_row(["Coin-hours (fee)", userinfo['balance']['fee']])
+                t.add_row(["Coin-hours (available)", userinfo['balance']['available']])
+
+                print(t)
+
             except MyNodesFileDoesNotExist as e:
                 print("MY NODES file not found.")
                 print("RUN python node.py set node-url")

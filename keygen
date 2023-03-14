@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python keygen.py
+python3 keygen.py $1 $2 $3

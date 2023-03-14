@@ -202,7 +202,8 @@ class files:
         fileinfo = {
             'id': info_node['id'],
             'filename': info_local['filename'],
-            'cipher': info_local['cipher'],
+            'cipher': info_local['cipher-type'],
+            'key': info_local['cipher'],
             'shadowname': shadowname,
             'status': self.__status(info_local['status']),
             'size_local': info_local['size'],
@@ -234,8 +235,17 @@ class files:
             self.output.line(result['error'])
         else:
             if self.auth.verify_two_way_result(currentNode['verify'], result):
-                self.output.line(" *** quota *** ")
-                self.output.line(self.auth.decrypt_two_way_result(result, self.localUserKey.getPrivateKey()))
+                print(" *** User file storage quota *** ")
+                quota = json.loads(self.auth.decrypt_two_way_result(result, self.localUserKey.getPrivateKey()))
+                quota = quota['quota']
+
+                t = PrettyTable(['Param', 'value'])
+                t.align = 'l'
+                t.add_row(["Total", humanize.naturalsize(quota['total'])])
+                t.add_row(["Used", humanize.naturalsize(quota['used'])])
+                t.add_row(["Free", humanize.naturalsize(quota['free'])])
+
+                print(t)
             else:
                 self.output.line(" ~~~ quota command FAILED ~~~ ")
                 self.output.line(" Verifying signature failed ")
