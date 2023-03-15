@@ -70,7 +70,7 @@ user@robocop:~/Code/PrivatenessTools$ ./ls
 +------------+----------+--------+--------+---------+-------------------------+
 ```
 *4* *5* and *6* are directory ID's linked to directory names all stored on client. `cgcu.94` is encrypted file with original file name `w.jpg` and encrypted with `salsa20` and uploaded from `/home/user/Videos/w.jpg`.
-Here is gileinfo for both files:
+Here is fileinfo for both files:
 ```
 user@robocop:~/Code/PrivatenessTools$ ./fileinfo cgcu.94
  *** fileinfo *** 
