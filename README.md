@@ -11,7 +11,7 @@ All registration are done by Emercoin blockchain NVS.
 
 All comunication between service node and client is encrypted and signed with ed25519 keypairs.
 
-## Instalation
+## Installation
 * Required Python 3.10 +
 `git clone https://github.com/NESS-Network/PrivatenessTools`
 
