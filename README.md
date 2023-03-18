@@ -17,7 +17,7 @@ All comunication between service node and client is encrypted and signed with ed
 
 `pip install humanize requests pynacl pycryptodome prettytable validators lxml`
 
-## Initialisation
+## Initialization
  * Generate user (keygen.py)
  * Register user in blockchain (`key.py nvs` and `key.py worm`)
  * Initialise local keys (key.py init)
