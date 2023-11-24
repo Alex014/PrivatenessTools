@@ -25,6 +25,7 @@ from NessKeys.keys.Encrypted import Encrypted
 from NessKeys.keys.BlockchainRPC import BlockchainRPC as BlockchainRpcKey
 from NessKeys.keys.Nodes import Nodes
 from NessKeys.keys.MyNodes import MyNodes
+from NessKeys.keys.Faucet import Faucet as Faucetkey
 import NessKeys.interfaces.KeyMaker as KeyMaker
 import NessKeys.interfaces.Storage as Storage
 import NessKeys.interfaces.NessKey as NessKey
@@ -108,6 +109,25 @@ class KeyManager:
 
         nodekey = NodeKey(nodedata)
         self.__storage.save(nodekey.compile(), filename)
+
+    def createFaucetkey(self, url: str, entropy: int):
+        keypair = self.__keypair(entropy)
+
+        fdata = {
+            "filedata": {
+                "vendor": "Privateness",
+                "type": "key",
+                "for": "faucet"
+            },
+            "keys": {
+                "private": keypair[0],
+                "verify": keypair[1]
+            },
+            "url": url
+        }
+
+        fkey = Faucetkey(fdata)
+        self.__storage.save(fkey.compile(), fkey.getFilename())
 
     def __getKey(self, filename: str) -> NessKey:
         keydata = self.__storage.restore(filename)

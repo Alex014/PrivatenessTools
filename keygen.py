@@ -44,15 +44,15 @@ class Keygen:
         print("#### Change user's keypair")
         print("  change <User Key File> <new keypair index>")
         print("  Example: $ python keygen.py change user.key.json 2")
+        print("#### Generate Faucet Key")
+        print("  faucet <Faucet URL> <Entropy level>")
+        print("  Example: $ python keygen.py faucet http://www.faucet.net 5")
         print("#### Generate seed")
         print("  seed <length> <Entropy level>")
         print("  Example: $ python keygen.py seed 32 5")
-        print("#### Show version")
-        print("  $ python codegen.py version")
-        print("  $ python codegen.py -v")
         print("#### Show this manual")
-        print("  $ python codegen.py help")
-        print("  $ python codegen.py -h")
+        print("  $ python keygen.py help")
+        print("  $ python keygen.py -h")
 
     def process(self):
         if len(sys.argv) == 6 and sys.argv[1].lower() == 'user':
@@ -103,6 +103,22 @@ class Keygen:
             manager = Container.KeyManager()
 
             return manager.createNodeKey(url, tariff, master_user, tags, entropy)
+
+        elif len(sys.argv) == 4 and sys.argv[1].lower() == 'faucet':
+            url = sys.argv[2]
+
+            if self.__is_integer(sys.argv[3]):
+                entropy = int(sys.argv[3])
+
+                if entropy < 1:
+                    entropy = 1
+            else:
+                print("<Entropy level> must be integer")
+                return False
+
+            manager = Container.KeyManager()
+
+            return manager.createFaucetkey(url, entropy)
 
         elif len(sys.argv) == 4 and sys.argv[1].lower() == 'change':
             key_filename = sys.argv[2]
