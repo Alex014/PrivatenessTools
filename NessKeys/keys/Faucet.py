@@ -78,7 +78,9 @@ class Faucet(NessKey):
         tab2 = '\t\t'
 
         worm = "<worm>" + linesep + \
-            tab + "<faucet type=\"ness\" url=\"" + nodedata["url"] + "\"></faucet>" + linesep + \
+            tab + "<faucet type=\"ness\" url=\"" + nodedata["url"] + "\">" + linesep + \
+            tab2 + "<!-- Description here -->" + linesep + \
+            tab + "</faucet>" + linesep + \
             "</worm>"
 
         return worm
