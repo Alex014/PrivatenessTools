@@ -64,7 +64,7 @@ class Faucet(NessKey):
         return self.__wrm(nodedata)
         
     def nvs(self) -> str:
-        return "worm:faucet:ness: " + self.__url
+        return "worm:faucet:ness:" + self.__url
         
     def print(self):
         return "Privateness Faucet Key: <{}>".format(self.__url)
@@ -78,7 +78,7 @@ class Faucet(NessKey):
         tab2 = '\t\t'
 
         worm = "<worm>" + linesep + \
-            tab + "<faucet type=\"ness\" url=\"" + nodedata["url"] + "\" />" + \
+            tab + "<faucet type=\"ness\" url=\"" + nodedata["url"] + "\"></faucet>" + linesep + \
             "</worm>"
 
         return worm

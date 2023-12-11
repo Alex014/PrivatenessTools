@@ -8,6 +8,7 @@ from NessKeys.keys.Encrypted import Encrypted
 from NessKeys.keys.BlockchainRPC import BlockchainRPC
 from NessKeys.keys.Nodes import Nodes
 from NessKeys.keys.MyNodes import MyNodes
+from NessKeys.keys.Faucet import Faucet
 from NessKeys.exceptions.LeafBuildException import LeafBuildException
 
 class KeyMakerNess(KeyMaker):
@@ -38,5 +39,7 @@ class KeyMakerNess(KeyMaker):
             return Nodes(keydata)
         elif vendor == "Privateness" and _type == 'service' and _for == 'node':
             return MyNodes(keydata)
+        elif vendor == "Privateness" and _type == 'key' and _for == 'faucet':
+            return Faucet(keydata)
 
         return False
